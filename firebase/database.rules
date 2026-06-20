@@ -1,0 +1,19 @@
+{
+  "rules": {
+    "liveLocations": {
+      "$tripId": {
+        ".read": "auth != null",
+        ".write": "auth != null && auth.token.role == 'driver'",
+        ".validate": "newData.hasChildren(['latitude', 'longitude', 'heading', 'updatedAt'])"
+      }
+    },
+    "tripPresence": {
+      "$tripId": {
+        ".read": "auth != null",
+        ".write": "auth != null"
+      }
+    },
+    ".read": false,
+    ".write": false
+  }
+}

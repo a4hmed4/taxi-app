@@ -1,0 +1,79 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isSelf(userId) {
+      return signedIn() && request.auth.uid == userId;
+    }
+
+    function userRole() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role
+        : null;
+    }
+
+    function isDriver() {
+      return signedIn() && userRole() == "driver";
+    }
+
+    function isPassenger() {
+      return signedIn() && userRole() == "passenger";
+    }
+
+    match /users/{userId} {
+      allow read: if isSelf(userId);
+      allow create: if isSelf(userId)
+        && request.resource.data.uid == request.auth.uid;
+      allow update: if isSelf(userId)
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.phoneNumber == resource.data.phoneNumber
+        && request.resource.data.createdAt == resource.data.createdAt
+        && (
+          request.resource.data.role == resource.data.role
+          || (resource.data.role == null && request.resource.data.role in ["driver", "passenger"])
+        )
+        && (
+          request.resource.data.onboardingCompleted == resource.data.onboardingCompleted
+          || (resource.data.role == "driver" && request.resource.data.onboardingCompleted == true)
+        );
+      allow delete: if false;
+    }
+
+    match /drivers/{driverId} {
+      allow read: if isSelf(driverId);
+      allow create: if isDriver()
+        && isSelf(driverId)
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.role == "driver"
+        && request.resource.data.onboardingCompleted == true;
+      allow update: if isDriver()
+        && isSelf(driverId)
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.role == "driver"
+        && request.resource.data.onboardingCompleted == true;
+      allow delete: if false;
+    }
+
+    match /trips/{tripId} {
+      allow read: if signedIn();
+      allow create: if isDriver();
+      allow update: if isDriver() && resource.data.driverId == request.auth.uid;
+      allow delete: if isDriver() && resource.data.driverId == request.auth.uid;
+    }
+
+    match /bookings/{bookingId} {
+      allow read: if signedIn();
+      allow create: if isPassenger();
+      allow update: if signedIn();
+      allow delete: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
