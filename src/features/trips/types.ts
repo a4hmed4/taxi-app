@@ -1,36 +1,42 @@
-import type { LatLng, RoutePoint } from "@/shared/types/location";
-import type { UserRole } from "@/features/auth/types";
-import type { DriverCarDetails } from "@/features/drivers/types";
+/**
+ * Booking types and interfaces
+ */
 
-export type TripStatus = "draft" | "published" | "in_progress" | "completed" | "cancelled";
+export type BookingStatus = "pending" | "confirmed" | "completed" | "cancelled";
 
-export type Trip = {
-  id: string;
-  driverId: string;
-  driverName: string;
-  role: UserRole;
-  origin: LatLng;
-  destination: LatLng;
-  route: RoutePoint[];
-  departureTime: number;
-  seatsAvailable: number;
-  seatsBooked: number;
-  status: TripStatus;
-  car?: DriverCarDetails;
-  routeName?: string;
-  notes?: string;
-  createdAt: number;
-  updatedAt: number;
-};
-
-export type TripBooking = {
+export interface Booking {
   id: string;
   tripId: string;
   passengerId: string;
   passengerName: string;
-  status: "requested" | "approved" | "rejected" | "cancelled";
-  pickupPoint?: LatLng;
-  dropoffPoint?: LatLng;
+  passengerPhone: string;
+  status: BookingStatus;
+  seatsBooked: number;
   createdAt: number;
   updatedAt: number;
-};
+  cancelledAt?: number;
+  completedAt?: number;
+}
+
+export interface BookingRequest {
+  tripId: string;
+  passengerId: string;
+  seatsBooked: number;
+}
+
+export interface BookingResponse {
+  success: boolean;
+  bookingId?: string;
+  message: string;
+  availableSeats?: number;
+}
+
+export interface PassengerBooking extends Booking {
+  trip?: {
+    startLocation: string;
+    destinationLocation: string;
+    departureTime: number;
+    driverName: string;
+    driverRating: number;
+  };
+}
