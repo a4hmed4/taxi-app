@@ -2,30 +2,46 @@ import type { ConfigContext, ExpoConfig } from "expo/config";
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  name: "Carpool",
-  slug: "smart-carpool",
-  scheme: "smartcarpool",
+  name: "KSA Carpool",
+  slug: "ksa-carpool",
+  scheme: "exp+ksa-carpool",
   version: "1.0.0",
-  orientation: "portrait",
-  platforms: ["ios", "android"],
-  userInterfaceStyle: "light",
   assetBundlePatterns: ["**/*"],
+  splash: {
+    image: "./assets/splash.png",
+    resizeMode: "contain",
+    backgroundColor: "#ffffff",
+  },
   ios: {
-    supportsTablet: true,
-    infoPlist: {
-      NSPhotoLibraryUsageDescription: "Allow Smart Carpool to upload your driver profile photo.",
-    },
+    supportsTabletMode: true,
   },
   android: {
-    permissions: ["READ_MEDIA_IMAGES"],
+    adaptiveIcon: {
+      foregroundImage: "./assets/adaptive-icon.png",
+      backgroundColor: "#ffffff",
+    },
   },
+  web: {
+    bundler: "metro",
+    output: "static",
+    favicon: "./assets/favicon.png",
+  },
+  plugins: [
+    [
+      "expo-location",
+      {
+        locationAlwaysAndWhenInUsePermission:
+          "Allow $(PRODUCT_NAME) to use your location.",
+      },
+    ],
+  ],
   extra: {
-    firebaseApiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
-    firebaseAuthDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
-    firebaseProjectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
-    firebaseStorageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
-    firebaseMessagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-    firebaseAppId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
-    googleMapsApiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
+    firebaseApiKey: process.env.FIREBASE_API_KEY,
+    firebaseAuthDomain: process.env.FIREBASE_AUTH_DOMAIN,
+    firebaseProjectId: process.env.FIREBASE_PROJECT_ID,
+    firebaseStorageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+    firebaseMessagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+    firebaseAppId: process.env.FIREBASE_APP_ID,
+    googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
   },
 });
